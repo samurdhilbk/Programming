@@ -1,39 +1,90 @@
 #include <stdio.h>
-#include <iostream>
-#include <vector>
+#include <float.h>
 #include <cmath>
+#include <cstdio>
+#include <vector>
+#include <map>
+#include <set>
 #include <climits>
+#include <iostream>
 #include <algorithm>
-
 using namespace std;
 
 typedef long long ll;
-typedef long double ld;
-typedef pair<ld,ll> pr;
+typedef pair<vector<vector<ll> >,vector<vector<ll> > > Key;
 
-bool check(vector<pr> vec,ld x,ld d,int c){
+ll findh(vector<vector<ll> > vecb,vector<vector<ll> > vect,map<Key,ll > &mp);
 
-	vector<ld> pos;
-	pos.push_back(vec[0].first-x);
-	for(int i=0;i<c;i++){
-		pr tmp=vec[i];
-		ld posi=tmp.first;
-		ll num=tmp.second;
-		ld temp_pos;
-		ll j1=(i==0)?1:0;
-		for(ll j=j1;j<num;j++){
-			ld p=pos.back();
-			if((posi-p)>=d){
-				temp_pos=(posi-x)>(p+d)?(posi-x):(p+d);
-				pos.push_back(temp_pos);
-			}
-			else if(fabs(p+d-posi)<=x){
-				pos.push_back(p+d);
-			}
-			else return false;
+ll solve(vector<vector<ll> > vecb,vector<vector<ll> > vect,map<Key,ll > &mp){
+
+    /*cout<<endl;
+    for(unsigned int i=0;i<vecb.size();i++){
+        cout<<vecb[i][0]<<" "<<vecb[i][1]<<" "; 
+    }
+    cout<<endl;
+    for(unsigned int i=0;i<vect.size();i++){
+        cout<<vect[i][0]<<" "<<vect[i][1]<<" "; 
+    }
+    cout<<endl<<endl;
+    
+    cout<<"map"<<" ";
+    for(auto iter:mp){
+            cout<<iter.second<<" ";
+        }
+    cout<<endl;
+    */
+	if(vecb.size()==0||vect.size()==0) return 0;
+	if(vecb[0][1]==vect[0][1]){
+		ll a=vecb[0][0],b=vect[0][0];
+		if(a>b){
+			vecb[0][0]=a-b;
+			vect.erase(vect.begin());
+			return (b+findh(vecb,vect,mp));
+		}
+		else if(a<b){
+			vect[0][0]=b-a;
+			vecb.erase(vecb.begin());
+			return (a+findh(vecb,vect,mp));	
+		}
+		else{
+			vecb.erase(vecb.begin());
+			vect.erase(vect.begin());
+			return (a+findh(vecb,vect,mp));
 		}
 	}
-	return true;
+	else{
+		vector<ll> temp=vecb[0];
+		vecb.erase(vecb.begin());
+		ll ret1=findh(vecb,vect,mp);
+		vecb.insert(vecb.begin(),temp);
+		vect.erase(vect.begin());
+		ll ret2=findh(vecb,vect,mp);
+		ll ret=(ret1>ret2)?ret1:ret2;
+		return ret;
+	}
+}
+
+ll findh(vector<vector<ll> > vecb,vector<vector<ll> > vect,map<Key,ll > &mp){
+	Key pr;
+	pr.first=vecb;
+	pr.second=vect;
+
+    
+    if(mp.find(pr)==mp.end()){
+        ll val=solve(vecb,vect,mp);
+          mp.insert(make_pair(pr,val));
+        /*cout<<"map"<<" ";
+    for(auto iter:mp){
+            cout<<iter.second<<" ";
+        }
+    cout<<endl;*/
+          return val;
+    }
+    else{       
+          //cout<<"fafadsfsdsfsd"<<endl;  
+          return mp.at(pr);  
+    }
+    
 }
 
 int main(){
@@ -41,32 +92,30 @@ int main(){
 	ios_base::sync_with_stdio(false);
 	int t;
 	cin>>t;
-
-	for(int i=0;i<t;i++){
-
-		int c;
-		ld d;
-		cin>>c>>d;
-
-		vector<pr> vec;
-
-		for(int j=0;j<c;j++){
-			pr temp;
-			ld p;
-			ll v;
-			cin>>p>>v;
-			temp.first=p;
-			temp.second=v;
-			vec.push_back(temp);
+	for (int i = 0; i < t; ++i){
+		int n,m;
+		cin>>n>>m;
+		vector<vector<ll> > vecb;
+		vector<vector<ll> > vect;
+        map<Key,ll > mp;
+		for(int j=0;j<n;j++){
+			vector<ll> temp;
+			ll num,type;
+			cin>>num>>type;
+			vecb.push_back(temp);
+			vecb[j].push_back(num);
+			vecb[j].push_back(type);
 		}
-        ld l=0,r=1e12,x=0,eps=1e-8;
-		if(i!=7) while((r-l)>eps){
-				x=(l+r)/2;
-				bool yn=check(vec,x,d,c);
-				if(yn) r=x;
-				else l=x;
-       		}
-	   //printf("Case #%d: %Lf\n",i+1,l );
-	   if(i!=7) cout<<"Case #"<<(i+1)<<": "<<l<<endl;
-	}
+		for(int j=0;j<m;j++){
+			vector<ll> temp;
+			ll num,type;
+			cin>>num>>type;
+			vect.push_back(temp);
+			vect[j].push_back(num);
+			vect[j].push_back(type);
+		}
+
+		printf("Case #%d: %lld\n",i+1,solve(vecb,vect,mp));
+        
+}
 }
